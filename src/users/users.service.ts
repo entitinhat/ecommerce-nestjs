@@ -3,15 +3,15 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { compare, hash } from 'bcrypt';
+import { sign } from 'jsonwebtoken';
+import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { UserEntity } from './entities/user.entity';
-import { UserSignUpDto } from './dto/user-signup.dto';
-import { hash, compare } from 'bcrypt';
 import { UserSignInDto } from './dto/user-signin.dto';
-import { sign } from 'jsonwebtoken';
+import { UserSignUpDto } from './dto/user-signup.dto';
+import { UserEntity } from './entities/user.entity';
 
 @Injectable()
 export class UsersService {
@@ -62,6 +62,18 @@ export class UsersService {
 
   update(id: number, updateUserDto: UpdateUserDto) {
     return `This action updates a #${id} user`;
+  }
+
+  async updateUserRole(id: number, updateUserDto: UpdateUserDto): Promise<any> {
+    const { roles } = updateUserDto;
+    const userUpdate = await this.usersRepository.findOneBy({ id });
+    if (!userUpdate) throw new NotFoundException('Cannot update user.');
+    userUpdate.roles = [roles[0]];
+    await this.usersRepository.save(userUpdate);
+    return {
+      data: userUpdate,
+      message: `user role updated successfully to ${roles[0]}.`,
+    };
   }
 
   remove(id: number) {

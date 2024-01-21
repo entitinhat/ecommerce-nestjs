@@ -1,24 +1,23 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
   UseGuards,
 } from '@nestjs/common';
-import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { UserSignUpDto } from './dto/user-signup.dto';
-import { UserEntity } from './entities/user.entity';
-import { UserSignInDto } from './dto/user-signin.dto';
+import { Roles } from 'src/utility/common/user-roles.enum';
 import { CurrentUser } from 'src/utility/decorators/current-user.decorator';
 import { AuthenticationGuard } from 'src/utility/guards/authentication.guard';
-import { AuthorizeRoles } from 'src/utility/decorators/authorize-roles.decorator';
-import { Roles } from 'src/utility/common/user-roles.enum';
 import { AuthorizeGuard } from 'src/utility/guards/authorization.guard';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { UserSignInDto } from './dto/user-signin.dto';
+import { UserSignUpDto } from './dto/user-signup.dto';
+import { UserEntity } from './entities/user.entity';
+import { UsersService } from './users.service';
 
 @Controller('users')
 export class UsersController {
@@ -28,6 +27,10 @@ export class UsersController {
   async signup(
     @Body() userSignUpDto: UserSignUpDto,
   ): Promise<{ user: UserEntity }> {
+    console.log(
+      '🚀 ~ file: users.controller.ts:30 ~ UsersController ~ userSignUpDto:',
+      userSignUpDto,
+    );
     return { user: await this.usersService.signup(userSignUpDto) };
   }
 
@@ -63,6 +66,14 @@ export class UsersController {
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.update(+id, updateUserDto);
+  }
+
+  @Patch(':id/role')
+  async updateUserRole(
+    @Param('id') id: string,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
+    return await this.usersService.updateUserRole(+id, updateUserDto);
   }
 
   @Delete(':id')
