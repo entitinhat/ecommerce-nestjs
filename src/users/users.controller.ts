@@ -45,6 +45,14 @@ export class UsersController {
     return { accessToken, user };
   }
 
+  @UseGuards(AuthenticationGuard)
+  @Get('profile')
+  async getProfile(
+    @CurrentUser() currentUser: UserEntity,
+  ): Promise<UserEntity> {
+    return currentUser;
+  }
+
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
     //return this.usersService.create(createUserDto);
@@ -53,12 +61,13 @@ export class UsersController {
 
   //@AuthorizeRoles(Roles.ADMIN)
   @UseGuards(AuthenticationGuard, AuthorizeGuard([Roles.ADMIN]))
-  @Get('all')
+  @Get()
   async findAll(): Promise<UserEntity[]> {
     return await this.usersService.findAll();
   }
 
-  @Get('single/:id')
+  @UseGuards(AuthenticationGuard)
+  @Get(':id')
   async findOne(@Param('id') id: string): Promise<UserEntity> {
     return await this.usersService.findOne(+id);
   }
@@ -68,6 +77,7 @@ export class UsersController {
     return this.usersService.update(+id, updateUserDto);
   }
 
+  @UseGuards(AuthenticationGuard, AuthorizeGuard([Roles.ADMIN]))
   @Patch(':id/role')
   async updateUserRole(
     @Param('id') id: string,
@@ -79,11 +89,5 @@ export class UsersController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.usersService.remove(+id);
-  }
-
-  @UseGuards(AuthenticationGuard)
-  @Get('me')
-  getProfile(@CurrentUser() currentUser: UserEntity) {
-    return currentUser;
   }
 }
