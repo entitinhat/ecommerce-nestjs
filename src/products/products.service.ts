@@ -5,16 +5,17 @@ import {
   NotFoundException,
   forwardRef,
 } from '@nestjs/common';
-import { CreateProductDto } from './dto/create-product.dto';
-import { UpdateProductDto } from './dto/update-product.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ProductEntity } from './entities/product.entity';
-import { Repository } from 'typeorm';
-import { CategoriesService } from 'src/categories/categories.service';
-import { UserEntity } from 'src/users/entities/user.entity';
-import { OrderStatus } from 'src/orders/enums/order-status.enum';
 import dataSource from 'db/data-source';
+import { CategoriesService } from 'src/categories/categories.service';
+import { OrderStatus } from 'src/orders/enums/order-status.enum';
 import { OrdersService } from 'src/orders/orders.service';
+import { UserEntity } from 'src/users/entities/user.entity';
+import { Repository } from 'typeorm';
+import { CreateProductDto } from './dto/create-product.dto';
+import { FilterProductsDto } from './dto/filter-products.dto';
+import { UpdateProductDto } from './dto/update-product.dto';
+import { ProductEntity } from './entities/product.entity';
 
 @Injectable()
 export class ProductsService {
@@ -42,10 +43,12 @@ export class ProductsService {
   }
 
   async findAll(
-    query: any,
+    query: FilterProductsDto,
   ): Promise<{ products: any[]; totalProducts; limit }> {
-    let filteredTotalProducts: number;
     let limit: number;
+
+    const { search, category, minPrice, maxPrice, minRating, maxRating } =
+      query;
 
     if (!query.limit) {
       limit = 4;
@@ -64,39 +67,37 @@ export class ProductsService {
       ])
       .groupBy('product.id,category.id');
 
-    const totalProducts = await queryBuilder.getCount();
-
-    if (query.search) {
-      const search = query.search;
+    if (search) {
       queryBuilder.andWhere('product.title like :title', {
         title: `%${search}%`,
       });
     }
 
-    if (query.category) {
-      queryBuilder.andWhere('category.id=:id', { id: query.category });
+    if (category) {
+      queryBuilder.andWhere('category.id=:id', { id: category });
     }
 
-    if (query.minPrice) {
+    if (minPrice) {
       queryBuilder.andWhere('product.price>=:minPrice', {
-        minPrice: query.minPrice,
+        minPrice: minPrice,
       });
     }
-    if (query.maxPrice) {
+
+    if (maxPrice) {
       queryBuilder.andWhere('product.price<=:maxPrice', {
-        maxPrice: query.maxPrice,
+        maxPrice: maxPrice,
       });
     }
 
-    if (query.minRating) {
+    if (minRating) {
       queryBuilder.andHaving('AVG(review.ratings)>=:minRating', {
-        minRating: query.minRating,
+        minRating: minRating,
       });
     }
 
-    if (query.maxRating) {
+    if (maxRating) {
       queryBuilder.andHaving('AVG(review.ratings) <=:maxRating', {
-        maxRating: query.maxRating,
+        maxRating: maxRating,
       });
     }
 
@@ -107,6 +108,7 @@ export class ProductsService {
     }
 
     const products = await queryBuilder.getRawMany();
+    const totalProducts = await queryBuilder.getCount();
 
     return { products, totalProducts, limit };
   }

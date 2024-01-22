@@ -1,4 +1,5 @@
 import { Expose, Transform, Type } from 'class-transformer';
+import { IsNumber } from 'class-validator';
 
 export class ProductsDto {
   @Expose()
@@ -19,6 +20,7 @@ export class ProductList {
   @Expose({ name: 'product_description' })
   description: string;
   @Expose({ name: 'product_price' })
+  @IsNumber()
   price: number;
   @Expose({ name: 'product_stock' })
   stock: number;

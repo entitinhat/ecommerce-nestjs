@@ -1,29 +1,26 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
-  UseGuards,
+  Get,
+  Param,
+  Patch,
+  Post,
   Query,
-  UseInterceptors,
+  UseGuards,
 } from '@nestjs/common';
-import { ProductsService } from './products.service';
-import { CreateProductDto } from './dto/create-product.dto';
-import { UpdateProductDto } from './dto/update-product.dto';
-import { AuthenticationGuard } from 'src/utility/guards/authentication.guard';
-import { AuthorizeGuard } from 'src/utility/guards/authorization.guard';
+import { UserEntity } from 'src/users/entities/user.entity';
 import { Roles } from 'src/utility/common/user-roles.enum';
 import { CurrentUser } from 'src/utility/decorators/current-user.decorator';
-import { UserEntity } from 'src/users/entities/user.entity';
-import { ProductEntity } from './entities/product.entity';
-import {
-  SerializeIncludes,
-  SerializeInterceptor,
-} from 'src/utility/interceptors/serialize.interceptor';
+import { AuthenticationGuard } from 'src/utility/guards/authentication.guard';
+import { AuthorizeGuard } from 'src/utility/guards/authorization.guard';
+import { SerializeIncludes } from 'src/utility/interceptors/serialize.interceptor';
+import { CreateProductDto } from './dto/create-product.dto';
+import { FilterProductsDto } from './dto/filter-products.dto';
 import { ProductsDto } from './dto/products.dto';
+import { UpdateProductDto } from './dto/update-product.dto';
+import { ProductEntity } from './entities/product.entity';
+import { ProductsService } from './products.service';
 
 @Controller('products')
 export class ProductsController {
@@ -40,8 +37,10 @@ export class ProductsController {
 
   @SerializeIncludes(ProductsDto)
   @Get()
-  async findAll(@Query() query: any): Promise<ProductsDto> {
-    return await this.productsService.findAll(query);
+  async findAll(
+    @Query() filterProductsDto: FilterProductsDto,
+  ): Promise<ProductsDto> {
+    return await this.productsService.findAll(filterProductsDto);
   }
 
   @Get(':id')

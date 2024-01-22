@@ -1,11 +1,4 @@
-import {
-  IsArray,
-  IsNotEmpty,
-  IsNumber,
-  IsPositive,
-  IsString,
-  Min,
-} from 'class-validator';
+import { IsArray, IsNotEmpty, IsNumber, IsString, Min } from 'class-validator';
 
 export class CreateProductDto {
   @IsNotEmpty({ message: 'title can not be blank.' })
@@ -16,12 +9,13 @@ export class CreateProductDto {
   @IsString()
   description: string;
 
-  @IsNotEmpty({ message: 'price should not be empty' })
-  @IsNumber(
-    { maxDecimalPlaces: 2 },
-    { message: 'price should be number & max decimal precission 2' },
-  )
-  @IsPositive({ message: 'price should be positive number' })
+  // @IsNumber(
+  //   { maxDecimalPlaces: 2 },
+  //   { message: 'price should be number & max decimal precission 2' },
+  // )
+  @IsNotEmpty({ message: 'price should not be empty.' })
+  @IsNumber({}, { message: 'price should be number' })
+  @Min(0, { message: 'price can not be negative.' })
   price: number;
 
   @IsNotEmpty({ message: 'stock should not be empty.' })
